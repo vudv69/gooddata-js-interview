@@ -9,16 +9,52 @@ const grossProfitMeasure = '/gdc/md/xms7ga4tf3g3nzucd8380o2bev8oeknp/obj/6877';
 const dateAttributeInMonths = '/gdc/md/xms7ga4tf3g3nzucd8380o2bev8oeknp/obj/2142';
 const dateAttribute = '/gdc/md/xms7ga4tf3g3nzucd8380o2bev8oeknp/obj/2180';
 
+const MONTH_OPTIONS = [
+    { name: 'January',   value:'1' },
+    { name: 'February',  value:'2' },
+    { name: 'March',     value:'3' },
+    { name: 'April',     value:'4' },
+    { name: 'May',       value:'5' },
+    { name: 'June',      value:'6' },
+    { name: 'July',      value:'7' },
+    { name: 'August',    value:'8' },
+    { name: 'September', value:'9' },
+    { name: 'October',   value:'10' },
+    { name: 'November',  value:'11' },
+    { name: 'December',  value:'12' }
+];
+const YEAR_OPTIONS = [
+    { name: '2015', value: '2015' },
+    { name: '2016', value: '2016' },
+    { name: '2017', value: '2017' }
+];
+const MONTH_OPTION_VALUE_DEFAULT = MONTH_OPTIONS[0].value;
+const YEAR_OPTION_VALUE_DEFAULT = YEAR_OPTIONS[1].value;
+
 class App extends Component {
 
-    getMonthFilter() {
+    constructor(props) {
+        super(props);
+        this.state = {
+            chartFilter: {
+                month: MONTH_OPTION_VALUE_DEFAULT,
+                year: YEAR_OPTION_VALUE_DEFAULT
+            }
+        };
+    }
+
+
+    getChartFilter() {
+        const from = `${this.state.chartFilter.year}-${this.state.chartFilter.month}-01`;
+        const to = `${this.state.chartFilter.year}-${this.state.chartFilter.month}-31`;
+
         return {
             absoluteDateFilter: {
                 dataSet: {
                     uri: dateAttribute
                 },
-                from: '2016-01-01',
-                to: '2016-01-31'
+                from: from,
+                to: to
             }
 
         }
@@ -54,34 +90,58 @@ class App extends Component {
         }
     }
 
-    renderDropdown() {
+    onChartFilterMonthChanged = (event) => {
+        const month = event.target.value;
+        this.onChartFilterChanged({month});
+    };
+
+    onChartFilterYearChanged = (event) => {
+        const year = event.target.value;
+        this.onChartFilterChanged({year});
+    };
+
+    onChartFilterChanged = (chartFilter) => {
+        this.setState(prevState => ({
+            chartFilter: {
+                ...prevState.chartFilter,
+                ...chartFilter
+            }
+        }));
+    };
+
+    renderMonthDropdown() {
         return (
-            <select defaultValue="1">
-                <option value="1">January</option>
-                <option value="2">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
+            <select onChange={this.onChartFilterMonthChanged} value={this.state.chartFilter.month}>
+                {MONTH_OPTIONS.map(month => (
+                    <option key={month.value} value={month.value}>
+                        {month.name}
+                    </option>
+                ))}
+            </select>
+        )
+    }
+
+    renderYearDropdown() {
+        return (
+            <select onChange={this.onChartFilterYearChanged} value={this.state.chartFilter.year}>
+                {YEAR_OPTIONS.map(year => (
+                    <option key={year.value} value={year.value}>
+                        {year.name}
+                    </option>
+                ))}
             </select>
         )
     }
 
     render() {
         const projectId = 'xms7ga4tf3g3nzucd8380o2bev8oeknp';
-        const filters = [this.getMonthFilter()];
+        const filters = [this.getChartFilter()];
         const measures = this.getMeasures();
         const viewBy = this.getViewBy();
 
         return (
             <div className="App">
-                <h1>$ Gross Profit in month {this.renderDropdown()} 2016</h1>
+                <h1>$ Gross Profit in month {this.renderMonthDropdown()} {this.renderYearDropdown()}</h1>
                 <div>
                     <ColumnChart
                         measures={measures}
